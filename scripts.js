@@ -7,18 +7,29 @@ function GenerateSomeMaps()
     var nx = 200;
     var ny = 100;
 
+    var lowerLeftCorner = new vec3(-2.0, -1.0, -1.0);
+    var horizontal = new vec3(4.0, 0.0, 0.0);
+    var vertical = new vec3(0.0, 2.0, 0.0);
+    var origin = new vec3(0.0, 0.0, 0.0);
+    
+    
     for(var j = ny - 1; j >= 0; j--){
         for(var i = 0; i < nx; i++){
-            var v = new vec3(i/nx, j/ny, 0.2);                        
-            var c = new vec3(Math.round(255.99*v.x),
-                             Math.round(255.99*v.y),
-                             Math.round(255.99*v.z)
+            var u = i/nx;
+            var v = j/ny;
+            
+            var r = new ray(origin, lowerLeftCorner.add(horizontal.sMultiply(u).add(vertical.sMultiply(v))));
+  
+            var col = new color(r);
+                                  
+            var c = new vec3(Math.round(255.99*col.x),
+                             Math.round(255.99*col.y),
+                             Math.round(255.99*col.z)
                             );
 
             ctx.beginPath();
-            ctx.rect(i, j, 1, 1);        
+            ctx.rect(i, ny - j, 1, 1);        
             ctx.fillStyle = 'rgb(' + c.x + ', ' + c.y + ', ' + c.z +')';
-
             ctx.fill();
         }
     }
@@ -129,4 +140,15 @@ function ray(origin, direction)
 {
     this.origin = origin;
     this.direction = direction;
+}
+
+function color(ray)
+{
+    this.unitDirection = ray.direction.unit();
+    this.t = 0.5*(this.unitDirection.y + 1.0);
+    this.unitVector = new vec3(1.0, 1.0, 1.0);    
+    this.vector = new vec3(0.5, 0.7, 1.0);
+    this.v1 = this.unitVector.sMultiply(1.0-this.t);
+    this.v2 = this.vector.sMultiply(this.t);
+    return this.v1.add(this.v2);
 }
