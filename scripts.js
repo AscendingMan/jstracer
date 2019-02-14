@@ -128,6 +128,14 @@ function cross(v1, v2)
                 (v1.x * v2.y - v1.y * v2.x));
 }
 
+function subtract(v1, v2) {
+    return new vec3(
+        v1.x - v2.x,            
+        v1.y - v2.y,
+        v1.z - v2.z
+    );
+}
+
 ray.prototype = 
 {
     pointAtParam : function(t)
@@ -144,6 +152,9 @@ function ray(origin, direction)
 
 function color(ray)
 {
+    if(hitSphere(new vec3(0,0,-1), 0.5, ray)){
+        return new vec3(1,0,0);
+    }
     this.unitDirection = ray.direction.unit();
     this.t = 0.5*(this.unitDirection.y + 1.0);
     this.unitVector = new vec3(1.0, 1.0, 1.0);    
@@ -151,4 +162,15 @@ function color(ray)
     this.v1 = this.unitVector.sMultiply(1.0-this.t);
     this.v2 = this.vector.sMultiply(this.t);
     return this.v1.add(this.v2);
+}
+
+function hitSphere(center /*vector*/, radius /*float*/, ray)
+{
+    var oc = subtract(ray.origin, center);
+    var a = dot(ray.direction, ray.direction);
+    var b = 2.0 * dot(oc, ray.direction);
+    var c = dot(oc, oc) - radius*radius;
+    var discriminant = b*b - 4*a*c;
+    if(discriminant > 0){ return true; }
+    else { return false; }
 }
