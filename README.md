@@ -1,2 +1,2 @@
 # jstracer
-Attempting to implement Peter Shirley's Raytracing in a weekend in JavaScript.
+Attempting to implement Peter Shirley's <i>Raytracing in a Weekend</i> in JavaScript.
