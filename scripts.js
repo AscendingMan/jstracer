@@ -136,11 +136,27 @@ function subtract(v1, v2) {
     );
 }
 
+function add(v1, v2) {
+    return new vec3(
+        v1.x + v2.x,            
+        v1.y + v2.y,
+        v1.z + v2.z
+    );
+}
+
+function sMultiply (scalar, vector) {
+    return new vec3(
+        vector.x * scalar,            
+        vector.y * scalar,
+        vector.z * scalar
+    );
+}
+
 ray.prototype = 
 {
     pointAtParam : function(t)
     {
-        return this.origin + t * this.direction;
+        return add(this.origin, sMultiply(t, this.direction));
     }
 };
 
@@ -152,25 +168,32 @@ function ray(origin, direction)
 
 function color(ray)
 {
-    if(hitSphere(new vec3(0,0,-1), 0.5, ray)){
-        return new vec3(1,0,0);
+    this.t = hitSphere(new vec3(0,0,1), 0.5, ray);
+    if(this.t > 0.0)
+    {
+        var tVec = subtract(ray.pointAtParam(this.t), new vec3(0,0,-1));
+        var N = tVec.unit();
+        return sMultiply(0.5, new vec3(N.x+1, N.y+1, N.z+1))
     }
     this.unitDirection = ray.direction.unit();
     this.t = 0.5*(this.unitDirection.y + 1.0);
-    this.unitVector = new vec3(1.0, 1.0, 1.0);    
-    this.vector = new vec3(0.5, 0.7, 1.0);
-    this.v1 = this.unitVector.sMultiply(1.0-this.t);
-    this.v2 = this.vector.sMultiply(this.t);
-    return this.v1.add(this.v2);
+
+    return add(sMultiply(1.0-this.t, new vec3(1,1,1)), sMultiply(this.t, new vec3(0.5, 0.7, 1.0)))
 }
 
 function hitSphere(center /*vector*/, radius /*float*/, ray)
 {
-    var oc = subtract(ray.origin, center);
-    var a = dot(ray.direction, ray.direction);
-    var b = 2.0 * dot(oc, ray.direction);
-    var c = dot(oc, oc) - radius*radius;
-    var discriminant = b*b - 4*a*c;
-    if(discriminant > 0){ return true; }
-    else { return false; }
+    this.oc = subtract(ray.origin, center);
+    this.a = dot(ray.direction, ray.direction);
+    this.b = 2.0 * dot(this.oc, ray.direction);
+    this.c = dot(this.oc, this.oc) - radius*radius;
+    this.discriminant = this.b*this.b - 4*this.a*this.c;
+
+    if(this.discriminant < 0)
+    { 
+        return -1.0; 
+    }
+    else { 
+        return (this.b - Math.sqrt(this.discriminant)) / (2.0 * this.a); 
+    }
 }
